@@ -2,7 +2,7 @@
 //  SongsList.swift
 //  YT-Vapor-iOS-App
 //
-//  Created by Juan Francisco Bazan Carrizo on 04/09/2022.
+//  Created by Juan Bazan Carrizo on 14/09/2022.
 //
 
 import SwiftUI
@@ -63,8 +63,9 @@ struct SongsList: View {
         }
     }
 }
+
 // MARK: - PREVIEW
-struct ContentView_Previews: PreviewProvider {
+struct SongsList_Previews: PreviewProvider {
     static var previews: some View {
         SongsList()
     }
