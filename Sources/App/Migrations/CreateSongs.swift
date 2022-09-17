@@ -7,16 +7,16 @@
 
 import Fluent
 
-struct CreateSongs: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("songs")
+struct CreateSongs: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.schema("songs")
             .id()
             .field("title", .string, .required)
             .create()
     }
     
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema("songs")
+    func revert(on database: Database) async throws {
+        try await database.schema("songs")
             .delete()
     }
 }

@@ -20,35 +20,36 @@ struct SongController: RouteCollection {
     }
     
     // GET Request  /songs route
-    func index(req: Request) throws -> EventLoopFuture<[Song]> {
-        return Song.query(on: req.db).all()
+    func index(req: Request) async throws -> [Song] {
+        try await Song.query(on: req.db).all()
     }
     
     // POST Request  /songs route
-    func create(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func create(req: Request) async throws -> HTTPStatus {
         let song = try req.content.decode(Song.self)
-        return song.save(on: req.db).transform(to: .ok)
+        try await song.save(on: req.db)
+        return .ok
     }
     
     // PUT Request  /songs route
-    func update(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func update(req: Request) async throws -> HTTPStatus {
         let song = try req.content.decode(Song.self)
+        guard let songFromDB = try await Song.find(song.id, on: req.db) else {
+            throw Abort(.notFound)
+        }
         
-        return Song.find(song.id, on: req.db)
-            .unwrap(or: Abort(.notFound))
-            .flatMap { songWrapped in 
-                songWrapped.title = song.title
-                return songWrapped.update(on: req.db).transform(to: .ok)
-            }
+        songFromDB.title = song.title
+        try await songFromDB.update(on: req.db)
+        return .ok
     }
     
     // DELETE Request  /songs/id route
-    func delete(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        Song.find(req.parameters.get("songID"), on: req.db)
-            .unwrap(or: Abort(.notFound))
-            .flatMap { songWrapped in
-                songWrapped.delete(on: req.db)
-            }
-            .transform(to: .ok)
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let songFromDB = try await Song.find(req.parameters.get("songID"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        try await songFromDB.delete(on: req.db)
+        return .ok
     }
 }
